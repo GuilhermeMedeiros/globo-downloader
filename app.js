@@ -3,9 +3,9 @@ var request = require('request').defaults({jar:true});
 var _ = require('lodash');
 var exec = require('exec');
 var fs = require('fs');
-var progress = require('download-status');
 var path = require('path');
-
+var chalk = require('chalk');
+var ProgressBar = require('node-progress');
 
 request.post({
 	url: 'https://login.globo.com/api/authentication',
@@ -55,7 +55,7 @@ request.post({
 							_.each(video.children, function(child){
 								_.each(child.resources, function(resource){
 									if(resource.height >= 720) {
-										downloadResource(children, resource);
+										downloadResource(video, resource, child);
 									}
 								})
 							})
@@ -81,41 +81,79 @@ request.post({
 })
 
 
+var downloading = {};
 
-function downloadResource(video, resource) {
-	console.log(video.id);
-	console.log(resource._id);
+function updateStatus(){
+	var data = [];
+
+	_.each(downloading, function(download){
+		data.push(download.video.title + ' - ' + download.resource._id + ' - ' + (parseInt(download.current, 10) / parseInt(download.total, 10) * 100) + '%')
+	})
+
+	process.stderr.moveCursor(0, data.length*-1);
+	process.stderr.clearScreenDown();
+	process.stderr.cursorTo(0);
+	process.stderr.write(data.join('\n'));
+}
+
+function downloadResource(video, resource, child) {
+	// console.log(video.id);
+	// console.log(resource._id);
 
 	request.get({
 		// url: "http://security.video.globo.com/videos/"+video.id+"/hash?resource_id="+resource._id+"&version=2.9.9.65&udid=null&player=html5"
-		url: "http://security.video.globo.com/videos/"+video.id+"/hash?resource_id="+resource._id+"&version=2.9.9.65&player=html5"
+		url: "http://security.video.globo.com/videos/"+ (child.id || video.id) +"/hash?resource_id="+resource._id+"&version=2.9.9.65&player=html5"
 	}, function(error, response, body){
 
-		console.log(response.body)
+		// console.log(response.body)
 
 		var hash = (JSON.parse(body)).hash;
 
 		exec(['python', 'hash.py', hash], function(err, out, code){
-			console.log(out);
+			// console.log(out);
 
 			hash = out.slice(2, -3)
 			var qs = resource.query_string_template.replace('{{hash}}', hash).replace('{{key}}', 'html5')
 			var url = resource.url + '?' + qs;
 
-
 			var req = request.get({url: url});
 
 				req.on('response', function(res){
-					progress()(res, url, function(){
-						//Finished
-					})
+
+					if (res.headers['content-length']) {
+
+						downloading[resource._id] = {res: res, resource: resource, video: video, current: 0, total: res.headers['content-length']};
+
+						res.on('data', function (data) {
+							downloading[resource._id].current+=data.length;
+							updateStatus();
+						});
+
+						res.on('end', function () {
+							console.log('end')
+						});
+					}
+
 				})
 
 				req.on('error', function(err){
 					console.log(err)
 				})
 
-				req.pipe(fs.createWriteStream(path.basename(resource.url)));
+				// req.pipe(fs.createWriteStream(path.basename(resource.url)));
+
+				var folder = video.title.replace(/\//gi, '-').replace(/[\,]/gi, '')
+
+				if(child){
+					if (!fs.existsSync(folder)) {
+						fs.mkdirSync(folder)
+					}
+					req.pipe(fs.createWriteStream('./' + folder + '/' + child.title + '.mp4'));
+				} else {
+					req.pipe(fs.createWriteStream('./' + video.title + '.mp4'));
+
+				}
+
 
 			// console.log(resource)
 			// console.log(hash)
