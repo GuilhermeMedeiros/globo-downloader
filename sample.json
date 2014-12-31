@@ -1,0 +1,254 @@
+WM.PlayerManager[0].playlist.videos[0]
+
+{
+    "videos": [
+        {
+            "id": 3844687,
+            "title": "Dupla Identidade - Último episódio, dia 19/12/2014, na íntegra",
+            "type": "FullEpisode",
+            "program": "Dupla identidade",
+            "program_id": 8193,
+            "provider_id": null,
+            "provider_url": null,
+            "site_page": "",
+            "zone_id": 110841,
+            "default_video_id": null,
+            "channel": "Rede Globo",
+            "channel_id": 196,
+            "category": "Entretenimento",
+            "subscriber_only": true,
+            "restricted_by_devices": false,
+            "service_id": 151,
+            "likes": 387,
+            "duration": 2960092,
+            "water_mark_url": "http://s2.glbimg.com/JokVh1g-3SbhAtQycubId3S682c=/s3.glbimg.com/v1/AUTH_180…048d9434295d27c4b6dadc248/media_kit/42/f3/a1511ca14eeeca2e054c45b56e07.png",
+            "resources": [
+                {
+                    "_id": "3844687_wmsm",
+                    "encrypted": false,
+                    "duration": 2960092,
+                    "players": [
+                        "html5",
+                        "ios",
+                        "android",
+                        "chromecast"
+                    ],
+                    "url": "http://vodstreaming.globo.com/v1/01/dc/60/3844687_60c66573b2c2ea05959b346edc120c2eaad27a95/3844687-manifest.wmsm/manifest.m3u8",
+                    "query_string_template": "h={{hash}}&k={{key}}"
+                }
+            ],
+            "children": [
+                {
+                    "id": 3844650,
+                    "title": "dupla 1 - 1912",
+                    "resources": [
+                        {
+                            "_id": "5494d822dd238199f0005b71",
+                            "encrypted": false,
+                            "duration": 931765,
+                            "players": [
+                                "flash",
+                                "windows_phone"
+                            ],
+                            "height": 360,
+                            "url": "http://voddownload.globo.com/v0/01/c5/31/3844650_312dd986a5aead437bd3113dccd6446bef320451/3844650-web360.mp4",
+                            "query_string_template": "h={{hash}}&k={{key}}",
+                            "id": "5494d822dd238199f0005b71"
+                        },
+                        {
+                            "_id": "5494d827921447763c00e926",
+                            "encrypted": false,
+                            "duration": 931765,
+                            "players": [
+                                "flash"
+                            ],
+                            "height": 480,
+                            "url": "http://voddownload.globo.com/v0/01/c5/31/3844650_312dd986a5aead437bd3113dccd6446bef320451/3844650-web480.mp4",
+                            "query_string_template": "h={{hash}}&k={{key}}"
+                        },
+                        {
+                            "_id": "5494d82d92144706e5009f63",
+                            "encrypted": false,
+                            "duration": 931765,
+                            "players": [
+                                "flash",
+                                "smoothstreaming",
+                                "chromecast"
+                            ],
+                            "height": 720,
+                            "url": "http://voddownload.globo.com/v0/01/c5/31/3844650_312dd986a5aead437bd3113dccd6446bef320451/3844650-web720.mp4",
+                            "query_string_template": "h={{hash}}&k={{key}}"
+                        },
+                        {
+                            "_id": "5494d82d9214478bb8000001_m3u8",
+                            "encrypted": false,
+                            "duration": 931765,
+                            "players": [
+                                "html5",
+                                "ios",
+                                "android"
+                            ],
+                            "url": "http://vodstreaming.globo.com/v0/01/c5/31/3844650_312dd986a5aead437bd3113dccd6446bef320451/3844650-manifest.ism/3844650-manifest.m3u8",
+                            "query_string_template": "h={{hash}}&k={{key}}"
+                        },
+                        {
+                            "_id": "5494d81d921447db6d00e92e",
+                            "encrypted": false,
+                            "duration": 931765,
+                            "players": [
+                                "android_limited"
+                            ],
+                            "height": 360,
+                            "url": "http://voddownload.globo.com/v0/01/c5/31/3844650_312dd986a5aead437bd3113dccd6446bef320451/3844650-iphone360.mp4",
+                            "query_string_template": "h={{hash}}&k={{key}}"
+                        },
+                        {
+                            "type": "thumbs-preview",
+                            "url": "http://v.glbimg.com/01/c5/31/3844650_312dd986a5aead437bd3113dccd6446bef320451/3844650-web360.mp4"
+                        }
+                    ]
+                },
+                {
+                    "id": 3844661,
+                    "title": "dupla 2 - 1912",
+                    "resources": [
+                        {
+                            "_id": "5494dc9d9214474800008cff",
+                            "encrypted": false,
+                            "duration": 943176,
+                            "players": [
+                                "flash",
+                                "windows_phone"
+                            ],
+                            "height": 360,
+                            "url": "http://voddownload.globo.com/v0/00/30/6b/3844661_6bbf299249d524b6c3c50cd298f286b078cf2d84/3844661-web360.mp4",
+                            "query_string_template": "h={{hash}}&k={{key}}",
+                            "id": "5494dc9d9214474800008cff"
+                        },
+                        {
+                            "_id": "5494dca292144706e5009f77",
+                            "encrypted": false,
+                            "duration": 943176,
+                            "players": [
+                                "flash"
+                            ],
+                            "height": 480,
+                            "url": "http://voddownload.globo.com/v0/00/30/6b/3844661_6bbf299249d524b6c3c50cd298f286b078cf2d84/3844661-web480.mp4",
+                            "query_string_template": "h={{hash}}&k={{key}}"
+                        },
+                        {
+                            "_id": "5494dcac92144706e5009f79",
+                            "encrypted": false,
+                            "duration": 943176,
+                            "players": [
+                                "flash",
+                                "smoothstreaming",
+                                "chromecast"
+                            ],
+                            "height": 720,
+                            "url": "http://voddownload.globo.com/v0/00/30/6b/3844661_6bbf299249d524b6c3c50cd298f286b078cf2d84/3844661-web720.mp4",
+                            "query_string_template": "h={{hash}}&k={{key}}"
+                        },
+                        {
+                            "_id": "5494dca49214472ab4000001_m3u8",
+                            "encrypted": false,
+                            "duration": 943176,
+                            "players": [
+                                "html5",
+                                "ios",
+                                "android"
+                            ],
+                            "url": "http://vodstreaming.globo.com/v0/00/30/6b/3844661_6bbf299249d524b6c3c50cd298f286b078cf2d84/3844661-manifest.ism/3844661-manifest.m3u8",
+                            "query_string_template": "h={{hash}}&k={{key}}"
+                        },
+                        {
+                            "_id": "5494dc9d921447e642008bc4",
+                            "encrypted": false,
+                            "duration": 943176,
+                            "players": [
+                                "android_limited"
+                            ],
+                            "height": 360,
+                            "url": "http://voddownload.globo.com/v0/00/30/6b/3844661_6bbf299249d524b6c3c50cd298f286b078cf2d84/3844661-iphone360.mp4",
+                            "query_string_template": "h={{hash}}&k={{key}}"
+                        },
+                        {
+                            "type": "thumbs-preview",
+                            "url": "http://v.glbimg.com/00/30/6b/3844661_6bbf299249d524b6c3c50cd298f286b078cf2d84/3844661-web360.mp4"
+                        }
+                    ]
+                },
+                {
+                    "id": 3844678,
+                    "title": "dupla 3 - 1912",
+                    "resources": [
+                        {
+                            "_id": "5494e30292144733f200d8ab",
+                            "encrypted": false,
+                            "duration": 1085151,
+                            "players": [
+                                "flash",
+                                "windows_phone"
+                            ],
+                            "height": 360,
+                            "url": "http://voddownload.globo.com/v0/01/13/99/3844678_9929574f07d64d6fcc06634b92c6cb967adce7ea/3844678-web360.mp4",
+                            "query_string_template": "h={{hash}}&k={{key}}",
+                            "id": "5494e30292144733f200d8ab"
+                        },
+                        {
+                            "_id": "5494e307921447db6d00e95c",
+                            "encrypted": false,
+                            "duration": 1085151,
+                            "players": [
+                                "flash"
+                            ],
+                            "height": 480,
+                            "url": "http://voddownload.globo.com/v0/01/13/99/3844678_9929574f07d64d6fcc06634b92c6cb967adce7ea/3844678-web480.mp4",
+                            "query_string_template": "h={{hash}}&k={{key}}"
+                        },
+                        {
+                            "_id": "5494e3119214474800008d12",
+                            "encrypted": false,
+                            "duration": 1085151,
+                            "players": [
+                                "flash",
+                                "smoothstreaming",
+                                "chromecast"
+                            ],
+                            "height": 720,
+                            "url": "http://voddownload.globo.com/v0/01/13/99/3844678_9929574f07d64d6fcc06634b92c6cb967adce7ea/3844678-web720.mp4",
+                            "query_string_template": "h={{hash}}&k={{key}}"
+                        },
+                        {
+                            "_id": "5494e309dd2381e718000001_m3u8",
+                            "encrypted": false,
+                            "duration": 1085151,
+                            "players": [
+                                "html5",
+                                "ios",
+                                "android"
+                            ],
+                            "url": "http://vodstreaming.globo.com/v0/01/13/99/3844678_9929574f07d64d6fcc06634b92c6cb967adce7ea/3844678-manifest.ism/3844678-manifest.m3u8",
+                            "query_string_template": "h={{hash}}&k={{key}}"
+                        },
+                        {
+                            "_id": "5494e2f9921447e642008bd3",
+                            "encrypted": false,
+                            "duration": 1085151,
+                            "players": [
+                                "android_limited"
+                            ],
+                            "height": 360,
+                            "url": "http://voddownload.globo.com/v0/01/13/99/3844678_9929574f07d64d6fcc06634b92c6cb967adce7ea/3844678-iphone360.mp4",
+                            "query_string_template": "h={{hash}}&k={{key}}"
+                        },
+                        {
+                            "type": "thumbs-preview",
+                            "url": "http://v.glbimg.com/01/13/99/3844678_9929574f07d64d6fcc06634b92c6cb967adce7ea/3844678-web360.mp4"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
