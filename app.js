@@ -50,43 +50,25 @@ request.post({
 					var playlist = JSON.parse(body);
 
 					_.each(playlist.videos, function(video){
-						_.each(video.resources, function(resource){
 
-							if(resource.height >= 720) {
-
-								request.get({
-									// url: "http://security.video.globo.com/videos/"+video.id+"/hash?resource_id="+resource._id+"&version=2.9.9.65&udid=null&player="+player
-									url: "http://security.video.globo.com/videos/"+video.id+"/hash?resource_id="+resource._id+"&version=2.9.9.65&player=html5"
-								}, function(error, response, body){
-
-									var hash = (JSON.parse(body)).hash;
-
-									exec(['python', 'hash.py', hash], function(err, out, code){
-										// console.log(out);
-
-										hash = out.slice(2, -3)
-										var qs = resource.query_string_template.replace('{{hash}}', hash).replace('{{key}}', 'html5')
-										var url = resource.url + '?' + qs;
-
-
-										var req = request.get({url: url});
-
-											req.on('response', function(res){
-												progress()(res, url, function(){
-													//Finished
-												})
-											})
-
-											req.pipe(fs.createWriteStream(path.basename(resource.url)));
-
-										// console.log(resource)
-										// console.log(hash)
-										// console.log(url)
-									})
-
+						if(video.children) {
+							_.each(video.children, function(child){
+								_.each(child.resources, function(resource){
+									if(resource.height >= 720) {
+										downloadResource(children, resource);
+									}
 								})
-							}
-						})
+							})
+
+						} else {
+							_.each(video.resources, function(resource){
+								if(resource.height >= 720) {
+									downloadResource(video, resource);
+								}
+							})
+						}
+
+
 
 					})
 
@@ -97,3 +79,48 @@ request.post({
 		}
 	})
 })
+
+
+
+function downloadResource(video, resource) {
+	console.log(video.id);
+	console.log(resource._id);
+
+	request.get({
+		// url: "http://security.video.globo.com/videos/"+video.id+"/hash?resource_id="+resource._id+"&version=2.9.9.65&udid=null&player=html5"
+		url: "http://security.video.globo.com/videos/"+video.id+"/hash?resource_id="+resource._id+"&version=2.9.9.65&player=html5"
+	}, function(error, response, body){
+
+		console.log(response.body)
+
+		var hash = (JSON.parse(body)).hash;
+
+		exec(['python', 'hash.py', hash], function(err, out, code){
+			console.log(out);
+
+			hash = out.slice(2, -3)
+			var qs = resource.query_string_template.replace('{{hash}}', hash).replace('{{key}}', 'html5')
+			var url = resource.url + '?' + qs;
+
+
+			var req = request.get({url: url});
+
+				req.on('response', function(res){
+					progress()(res, url, function(){
+						//Finished
+					})
+				})
+
+				req.on('error', function(err){
+					console.log(err)
+				})
+
+				req.pipe(fs.createWriteStream(path.basename(resource.url)));
+
+			// console.log(resource)
+			// console.log(hash)
+			// console.log(url)
+		})
+
+	})
+}
