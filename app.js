@@ -90,10 +90,12 @@ function updateStatus(){
 		data.push(download.video.title + ' - ' + download.resource._id + ' - ' + (parseInt(download.current, 10) / parseInt(download.total, 10) * 100) + '%')
 	})
 
-	process.stderr.moveCursor(0, data.length*-1);
-	process.stderr.clearScreenDown();
-	process.stderr.cursorTo(0);
-	process.stderr.write(data.join('\n'));
+	// process.stderr.moveCursor(0, data.length*-1);
+	// process.stderr.clearScreenDown();
+	// process.stderr.cursorTo(0);
+	// process.stderr.write(data.join('\n'));
+
+	console.log(data)
 }
 
 function downloadResource(video, resource, child) {
@@ -105,7 +107,7 @@ function downloadResource(video, resource, child) {
 		url: "http://security.video.globo.com/videos/"+ (child.id || video.id) +"/hash?resource_id="+resource._id+"&version=2.9.9.65&player=html5"
 	}, function(error, response, body){
 
-		// console.log(response.body)
+		console.log(response.body)
 
 		var hash = (JSON.parse(body)).hash;
 
@@ -122,10 +124,10 @@ function downloadResource(video, resource, child) {
 
 					if (res.headers['content-length']) {
 
-						downloading[resource._id] = {res: res, resource: resource, video: video, current: 0, total: res.headers['content-length']};
+						downloading[video.id + '_ ' + resource._id] = {res: res, resource: resource, video: video, current: 0, total: res.headers['content-length']};
 
 						res.on('data', function (data) {
-							downloading[resource._id].current+=data.length;
+							downloading[video.id + '_ ' + resource._id].current+=data.length;
 							updateStatus();
 						});
 
