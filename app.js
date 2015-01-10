@@ -119,7 +119,7 @@ var downloadManager = (function(){
 			axel.stdout.pipe(process.stdout);
 
 			axel.on('exit', function(){
-				mv(file.filename + file.extension, file.destination, {mkdirp: true})
+				mv(file.filename + file.extension, file.destination, {mkdirp: true}, function(){})
 				if(_files.length) start(); //Start next
 			})
 
