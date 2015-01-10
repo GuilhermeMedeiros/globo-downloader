@@ -5,6 +5,9 @@ var fs = require('fs');
 var path = require('path');
 var Q = require('q');
 var chalk = require('chalk')
+var spawn = require('child_process').spawn
+var mv = require('mv')
+
 
 var globo = (function(){
 
@@ -106,77 +109,44 @@ var globo = (function(){
 
 
 var downloadManager = (function(){
-	var _downloading = [];
-	var _progressInfo = {};
+	var _files = [];
 
-	var startDownload = function(url, folder, filename){
-		var defer = Q.defer();
-		var extension = path.extname(url.split('?')[0]);
-			folder = folder.replace(/\//gi, '-').replace(/[\,]/gi, '')
-			filename = filename.replace(/\//gi, '-').replace(/[\,]/gi, '')
+	var start = function(){
 
-		var destination = path.join(process.argv[3] || './', folder, filename + extension)
-		var totalSize = 0;
-		var downloaded = 0;
-		var req = request.get(url);
-			req.on('error', defer.reject);
-			req.on('response', function(response){
-				if(response.headers['content-length']) {
+		var file = _files.pop();
 
-					totalSize = response.headers['content-length'];
+		var axel = spawn('axel', ['-n30', '-a', '-o' + file.filename + file.extension, file.url]);
+			axel.stdout.pipe(process.stdout);
 
-					response.on('data', function (data) {
-						downloaded += data.length
-						_progressInfo[destination] = {
-							downloaded: downloaded,
-							totalSize: totalSize,
-							destination: destination
-						}
-						defer.notify(_progressInfo[destination]);
-					})
-
-					response.on('end', function(){
-						defer.resolve(destination)
-						_.pull(_downloading, destination);
-						logEnd(destination)
-					})
-				}
+			axel.on('exit', function(){
+				mv(file.filename + file.extension, file.destination, {mkdirp: true})
+				if(_files.length) start(); //Start next
 			})
 
-		if (!fs.existsSync(path.dirname(destination))) {
-			fs.mkdirSync(path.dirname(destination))
-		}
+	}
 
-		req.pipe(fs.createWriteStream(destination));
-		_downloading.push(destination);
-		logProgress();
+	var addFile = function(url, folder, filename){
+		var extension = path.extname(url.split('?')[0]);
+			folder = folder.replace(/\//gi, '-').replace(/[\,]/gi, '').trim()
+			filename = filename.replace(/\//gi, '-').replace(/[\,]/gi, '').trim()
+
+		var destination = path.join(process.argv[3] || './', folder, filename + extension)
+
+		_files.push({
+			url: url,
+			folder: folder,
+			filename: filename,
+			destination: destination,
+			extension: extension
+		})
 
 		return defer.promise;
 	}
 
-	var logProgress = function(){
-		if(_downloading.length > 0) {
-			var hasProgress = false;
-
-			_.each(_downloading, function(item){
-				var progress = _progressInfo[item];
-				if(hasProgress = progress){
-					console.log(chalk.gray(progress.destination), parseFloat(progress.downloaded/progress.totalSize*100, 10).toFixed(2) + '%')
-				}
-			})
-
-			if(hasProgress) console.log(chalk.gray('--------------'))
-
-			setTimeout(logProgress, 500);
-		}
-	}
-
-	var logEnd = function(destination){
-		console.log(chalk.gray(destination), chalk.green('✓'))
-	}
 
 	return {
-		startDownload: startDownload
+		addFile: addFile,
+		start: start
 	}
 
 }())
@@ -194,19 +164,19 @@ globo.login('medeeiros@globo.com', 'dnamoris2')
 	.then(globo.getPlaylist)
 	.then(function(playlist){
 
+		var promises = [];
+
 		_.each(playlist.videos, function(video){
 			if(video.children) {
 				_.each(video.children, function(child){
 					_.each(child.resources, function(resource){
 						if(resource.height >= 720) {
-							globo.getDownloadURL(child, resource).then(function(url){
-								downloadManager.startDownload(url, video.title, child.title)
-									.then(function(){
-										//Finished
-									}, function(error){
-										console.log(error)
-									})
-							});
+							var promise = globo.getDownloadURL(child, resource);
+								promise.then(function(url){
+									downloadManager.addFile(url, video.title, child.title)
+								});
+
+							promises.push(promise);
 						}
 					})
 				})
@@ -214,16 +184,17 @@ globo.login('medeeiros@globo.com', 'dnamoris2')
 			} else {
 				_.each(video.resources, function(resource){
 					if(resource.height >= 720) {
-						globo.getDownloadURL(video, resource).then(function(url){
-							downloadManager.startDownload(url, video.title, video.title)
-								.then(function(){
-									//Finished
-								}, function(error){
-									console.log(error)
-								})
-						});
+						var promise = globo.getDownloadURL(video, resource);
+							promise.then(function(url){
+								downloadManager.addFile(url, video.title, video.title)
+							});
+
+						promises.push(promise);
 					}
 				})
 			}
 		})
+
+		return Q.allSettled(promises);
 	})
+	.then(downloadManager.start)
