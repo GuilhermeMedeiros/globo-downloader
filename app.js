@@ -8,6 +8,8 @@ var chalk = require('chalk')
 var spawn = require('child_process').spawn
 var mv = require('mv')
 
+var inquirer = require("inquirer");
+
 
 var globo = (function(){
 
@@ -99,12 +101,28 @@ var globo = (function(){
 			})
 	}
 
+
+	var getIntegras = function(slug){
+		var defer = Q.defer()
+
+		request.get("http://globotv.globo.com/rede-globo/"+slug+"/integras.json", function(error, response, body){
+			if(error){
+				defer.reject(error);
+			} else {
+				defer.resolve(JSON.parse(body));
+			}
+		})
+
+		return defer.promise;
+	}
+
 	return {
 		getSignedHash: getSignedHash,
 		login: login,
 		getPlaylist: getPlaylist,
 		getIDFromURL: getIDFromURL,
-		getDownloadURL: getDownloadURL
+		getDownloadURL: getDownloadURL,
+		getIntegras: getIntegras
 	}
 
 }())
@@ -112,31 +130,40 @@ var globo = (function(){
 
 var downloadManager = (function(){
 	var _files = [];
+	var MC_BASEPATH = '/Users/guilherme/Media Center/Globo/'
 
 	var start = function(){
 
 		var file = _files.pop();
 
-		var axel = spawn('axel', ['-n30', '-a', '-o' + file.filename + file.extension, file.url]);
+		var axel = spawn('axel', ['-n30', '-a', '-o' + '_temp/' + file.filename + file.extension, file.url]);
 			axel.stdout.pipe(process.stdout);
 
 			axel.on('exit', function(){
-				mv(file.filename + file.extension, file.destination, {mkdirp: true}, function(){})
+				mv('_temp/' + file.filename + file.extension, file.destination, {mkdirp: true}, function(){})
 				if(_files.length) start(); //Start next
 			})
-
 	}
 
-	var addFile = function(url, folder, filename){
+	var addFile = function(url, title, id){
+		var date, episode, filename, destination;
 		var extension = path.extname(url.split('?')[0]);
-			folder = folder.replace(/\//gi, '-').replace(/[\,]/gi, '').trim()
-			filename = filename.replace(/\//gi, '-').replace(/[\,]/gi, '').trim()
+		var program = title.split('-')[0].trim()
 
-		var destination = path.join(process.argv[3] || './', folder, filename + extension)
+		if(title.match(/[\d+\/]+/)) {
+			date = title.match(/[\d+\/]+/).pop().split('/').reverse().join('-')
+			episode = [program, date].join(' - ')
+			filename = [episode, 'pt'+id].join(' - ')
+			destination = path.join(MC_BASEPATH, program, episode, filename + extension)
+		} else {
+			episode = program;
+			filename = program;
+			destination = path.join(MC_BASEPATH, program, filename + extension)
+		}
 
 		_files.push({
 			url: url,
-			folder: folder,
+			folder: title,
 			filename: filename,
 			destination: destination,
 			extension: extension
@@ -155,48 +182,81 @@ var downloadManager = (function(){
 
 
 if(!process.argv[2]) {
-	return console.log('URL not defined');
+	var promises = [];
+
+	inquirer.prompt({type: 'list', message: "Programa", name: 'program', choices: ['imperio', 'big-brother-brasil', 'other']}, function(answer) {
+		if(answer.program == 'other') {
+			inquirer.prompt({name: 'program', message: 'Slug'}, function(answer) {
+
+			})
+		} else {
+			chooseEpisode(answer.program)
+		}
+	})
+
+	function chooseEpisode(program) {
+		globo.getIntegras(program).then(function(data){
+
+			var choices = {};
+
+			data.map(function(episode){
+				choices[episode.titulo] = episode.url;
+			})
+
+			inquirer.prompt({type: 'list', message: "Episódio", name: 'episode', choices: _.keys(choices)}, function(answer) {
+				var url = choices[answer.episode];
+				processVideo(url)
+			})
+
+		})
+	}
+
+} else {
+	processVideo(process.argv[2])
 }
 
-globo.login('medeeiros@globo.com', 'dnamoris2')
-	.then(function(){
-		return process.argv[2]
-	})
-	.then(globo.getIDFromURL)
-	.then(globo.getPlaylist)
-	.then(function(playlist){
+function processVideo(url) {
+	globo.login('medeeiros@globo.com', 'dnamoris2')
+		.then(function(){
+			return url
+		})
+		.then(globo.getIDFromURL)
+		.then(globo.getPlaylist)
+		.then(function(playlist){
 
-		var promises = [];
+			var promises = [];
 
-		_.each(playlist.videos, function(video){
-			if(video.children) {
-				_.each(video.children, function(child){
-					_.each(child.resources, function(resource){
+			_.each(playlist.videos, function(video){
+				if(video.children) {
+					_.each(video.children, function(child){
+						_.each(child.resources, function(resource){
+							if(resource.height >= 720) {
+								var promise = globo.getDownloadURL(child, resource);
+									promise.then(function(url){
+										downloadManager.addFile(url, video.title, child.id)
+									});
+
+								promises.push(promise);
+							}
+						})
+					})
+
+				} else {
+					_.each(video.resources, function(resource){
 						if(resource.height >= 720) {
-							var promise = globo.getDownloadURL(child, resource);
+							var promise = globo.getDownloadURL(video, resource);
 								promise.then(function(url){
-									downloadManager.addFile(url, video.title, child.title)
+									downloadManager.addFile(url, video.title, video.id)
 								});
 
 							promises.push(promise);
 						}
 					})
-				})
+				}
+			})
 
-			} else {
-				_.each(video.resources, function(resource){
-					if(resource.height >= 720) {
-						var promise = globo.getDownloadURL(video, resource);
-							promise.then(function(url){
-								downloadManager.addFile(url, video.title, video.title)
-							});
-
-						promises.push(promise);
-					}
-				})
-			}
+			return Q.allSettled(promises);
 		})
+		.then(downloadManager.start)
+}
 
-		return Q.allSettled(promises);
-	})
-	.then(downloadManager.start)
