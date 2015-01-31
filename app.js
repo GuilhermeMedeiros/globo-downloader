@@ -50,9 +50,11 @@ var globo = (function(){
 				'Content-Type': 'application/json'
 			},
 			body: {
-				email: email,
-				password: password,
-				serviceId: serviceId || 4654
+				payload: {
+					email: email,
+					password: password,
+					serviceId: serviceId || 4654
+				}
 			},
 			json: true
 
