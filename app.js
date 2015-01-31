@@ -145,15 +145,17 @@ var downloadManager = (function(){
 			})
 	}
 
-	var addFile = function(url, title, id){
+	var addFile = function(url, title, pt, resourceTitle){
 		var date, episode, filename, destination;
 		var extension = path.extname(url.split('?')[0]);
 		var program = title.split('-')[0].trim()
 
+		console.log('====> pt', pt, ': ',  resourceTitle)
+
 		if(title.match(/[\d+\/]+/)) {
 			date = title.match(/[\d+\/]+/).pop().split('/').reverse().join('-')
 			episode = [program, date].join(' - ')
-			filename = [episode, 'pt'+id].join(' - ')
+			filename = [episode, 'pt'+pt].join(' - ')
 			destination = path.join(MC_BASEPATH, program, episode, filename + extension)
 		} else {
 			episode = program;
@@ -228,12 +230,12 @@ function processVideo(url) {
 
 			_.each(playlist.videos, function(video){
 				if(video.children) {
-					_.each(video.children, function(child){
+					_.each(video.children, function(child, childrenIndex){
 						_.each(child.resources, function(resource){
 							if(resource.height >= 720) {
 								var promise = globo.getDownloadURL(child, resource);
 									promise.then(function(url){
-										downloadManager.addFile(url, video.title, child.id)
+										downloadManager.addFile(url, video.title, childrenIndex+1, child.title)
 									});
 
 								promises.push(promise);
@@ -246,7 +248,7 @@ function processVideo(url) {
 						if(resource.height >= 720) {
 							var promise = globo.getDownloadURL(video, resource);
 								promise.then(function(url){
-									downloadManager.addFile(url, video.title, video.id)
+									downloadManager.addFile(url, video.title)
 								});
 
 							promises.push(promise);
