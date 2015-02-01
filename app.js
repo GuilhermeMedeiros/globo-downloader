@@ -6,7 +6,7 @@ var path = require('path');
 var Q = require('q');
 var chalk = require('chalk')
 var spawn = require('child_process').spawn
-var mv = require('mv')
+var mkdirp = require('mkdirp');
 
 var inquirer = require("inquirer");
 
@@ -136,13 +136,18 @@ var downloadManager = (function(){
 
 		var file = _files.pop();
 
-		var axel = spawn('axel', ['-n30', '-a', '-o' + '_temp/' + file.filename + file.extension, file.url]);
-			axel.stdout.pipe(process.stdout);
+		mkdirp(path.dirname(file.destination), function(){
+			var axel = spawn('axel', ['-n30', '-a', '-o' + file.destination, file.url]);
+				axel.stdout.pipe(process.stdout);
 
-			axel.on('exit', function(){
-				mv('_temp/' + file.filename + file.extension, file.destination, {mkdirp: true}, function(){})
-				if(_files.length) start(); //Start next
-			})
+				axel.on('exit', function(){
+					if(_files.length) {
+						process.nextTick(start); //Start next
+					}
+				})
+		})
+
+
 	}
 
 	var addFile = function(url, title, pt, resourceTitle){
@@ -165,10 +170,9 @@ var downloadManager = (function(){
 
 		_files.push({
 			url: url,
-			folder: title,
+			extension: extension,
 			filename: filename,
-			destination: destination,
-			extension: extension
+			destination: destination
 		})
 
 		return defer.promise;
