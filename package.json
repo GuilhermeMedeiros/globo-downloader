@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Download videos from globo.com",
   "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
   "dependencies": {
     "chalk": "^0.5.1",
     "exec": "^0.1.3",

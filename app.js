@@ -1,3 +1,9 @@
+var MC_BASEPATH = '/Users/guilherme/Media Center/Globo/';
+var DEFAULT_PROGRAMS = ['imperio', 'big-brother-brasil'];
+var GLOBO_USERNAME = 'medeeiros@globo.com';
+var GLOBO_PASSWORD = 'dnamoris2';
+
+///////////////////////
 var request = require('request').defaults({jar:true});
 var _ = require('lodash');
 var exec = require('exec');
@@ -7,9 +13,7 @@ var Q = require('q');
 var chalk = require('chalk')
 var spawn = require('child_process').spawn
 var mkdirp = require('mkdirp');
-
 var inquirer = require("inquirer");
-
 
 var globo = (function(){
 
@@ -130,7 +134,6 @@ var globo = (function(){
 
 var downloadManager = (function(){
 	var _files = [];
-	var MC_BASEPATH = '/Users/guilherme/Media Center/Globo/'
 
 	var start = function(){
 
@@ -190,10 +193,10 @@ var downloadManager = (function(){
 if(!process.argv[2]) {
 	var promises = [];
 
-	inquirer.prompt({type: 'list', message: "Programa", name: 'program', choices: ['imperio', 'big-brother-brasil', 'other']}, function(answer) {
+	inquirer.prompt({type: 'list', message: "Programa", name: 'program', choices: DEFAULT_PROGRAMS.concat(['other'])}, function(answer) {
 		if(answer.program == 'other') {
 			inquirer.prompt({name: 'program', message: 'Slug'}, function(answer) {
-
+				chooseEpisode(answer.program)
 			})
 		} else {
 			chooseEpisode(answer.program)
@@ -222,7 +225,7 @@ if(!process.argv[2]) {
 }
 
 function processVideo(url) {
-	globo.login('medeeiros@globo.com', 'dnamoris2')
+	globo.login(GLOBO_USERNAME, GLOBO_PASSWORD)
 		.then(function(){
 			return url
 		})
