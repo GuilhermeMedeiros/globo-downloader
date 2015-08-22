@@ -1,3 +1,4 @@
+import sys;
 import htmlentitydefs
 import itertools
 import re
@@ -205,3 +206,6 @@ class hashJS():
         b, c, d, e, f = ('04', '03', '02', '', a[0:2])
         return (f == b and self.O(a) or
                 (f == c or f == d) and self.M(a) or e)
+
+
+print(hashJS.get_signed_hashes(sys.argv[1]))

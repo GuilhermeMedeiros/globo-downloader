@@ -2,9 +2,9 @@
   "name": "globo-downloader",
   "version": "1.0.0",
   "description": "Download videos from globo.com",
-  "main": "app.js",
-  "scripts": {
-    "start": "node app.js"
+  "main": "lib",
+  "bin": {
+    "globo-downloader": "bin/globo-downloader"
   },
   "dependencies": {
     "chalk": "^0.5.1",
@@ -12,7 +12,6 @@
     "inquirer": "^0.8.0",
     "lodash": "^2.4.1",
     "mkdirp": "^0.5.0",
-    "mv": "^2.0.3",
     "q": "^1.1.2",
     "request": "^2.51.0"
   },

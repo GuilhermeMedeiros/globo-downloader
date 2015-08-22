@@ -1,0 +1,72 @@
+#!/usr/bin/env node
+var _ = require('lodash');
+var Q = require('q');
+var inquirer = require("inquirer");
+var fs = require("fs");
+
+var globo = require('../lib/globo');
+var downloadManager = require('../lib/downloadManager');
+var credentialsManager = require('../lib/credentialsManager');
+
+var link, credentials;
+var questions = [];
+
+if(!credentialsManager.hasCredentials()) {
+	questions.push({type: 'text', message: 'Email', name: 'email'});
+	questions.push({type: 'password', message: 'Password', name: 'password'})
+	questions.push({type: 'boolean', message: 'Do you want to save this password?', name: 'saveCredentials'})
+} else {
+	credentials = credentialsManager.getCredentials();
+}
+
+if(!process.argv[2]) {
+	questions.push({type: 'text', message: 'Link', name: 'link'});
+}
+
+inquirer.prompt(questions, function(answer) {
+
+	globo.login(answer.email || credentials.email, answer.password || credentials.password)
+		.then(function(){
+			if(answer.saveCredentials) credentialsManager.saveCredentials(answer.email, answer.password);
+			return answer.link || process.argv[2]
+		})
+		.then(globo.getIDFromURL)
+		.then(globo.getPlaylist)
+		.then(function(playlist){
+			var promises = [];
+
+			_.each(playlist.videos, function(video){
+				if(video.children) {
+					_.each(video.children, function(child, childrenIndex){
+						_.each(child.resources, function(resource){
+							if(resource.height >= 720) {
+								var promise = globo.getDownloadURL(child, resource);
+									promise.then(function(url){
+										downloadManager.addFile(url, video.title, childrenIndex+1, child.title)
+									});
+
+								promises.push(promise);
+							}
+						})
+					})
+				} else {
+					_.each(video.resources, function(resource){
+						if(resource.height >= 720) {
+							var promise = globo.getDownloadURL(video, resource);
+								promise.then(function(url){
+									downloadManager.addFile(url, video.title)
+								});
+
+							promises.push(promise);
+						}
+					})
+				}
+			})
+
+			return Q.all(promises);
+		})
+		.then(downloadManager.start)
+		.catch(function(err){
+			console.error('[ERROR]', err);
+		})
+})
